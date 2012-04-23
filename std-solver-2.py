@@ -91,12 +91,12 @@ def get_difference_spots(pix):
 
 
 def main(argv):
-    import argparse
-
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--mirror-x', action='store_true')
     parser.add_argument('--mirror-y', action='store_true')
-    args = parser.parse_args()
+    parser.add_argument('--no-display', action='store_false', dest='display')
+    parser.add_argument('--no-click', action='store_false', dest='clicks')
+    args = parser.parse_args(argv[1:])
 
     am = AutoMeta()
 
@@ -116,12 +116,15 @@ def main(argv):
     diffs = get_difference_spots(pix)
     print "done"
 
-    for diff in diffs:
-        am.move_mouse(pos[0] + diff[1], pos[1] + diff[0])
-        time.sleep(.1)
-        am.left_click()
+    if args.clicks:
+        # TODO: if two diffs are very close, only click one
+        for diff in diffs:
+            am.move_mouse(pos[0] + diff[1], pos[1] + diff[0])
+            time.sleep(.1)
+            am.left_click()
 
-    Image.fromarray(pix).show()
+    if args.display:
+        Image.fromarray(pix).show()
 
 
 if __name__ == "__main__":
