@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import Image
-import ImageChops
 import ImageOps
 import numpy
 from scipy import ndimage
@@ -83,7 +82,7 @@ def get_difference_image(im1, im2):
 
 
 def get_difference_spots(pix):
-    bpix = pix > 10
+    bpix = pix > 20
     bpix = ndimage.binary_opening(bpix)
     bpix = ndimage.binary_closing(bpix)
     labels, n = ndimage.measurements.label(bpix)
