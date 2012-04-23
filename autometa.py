@@ -19,6 +19,7 @@ try:
     import win32con
 except:
     win32api = False
+    win32con = False
 
 try:
     import Xlib
@@ -41,7 +42,7 @@ class AutoMeta:
     def grab_screen(self, x, y, w, h):
         if wx:
             screen = wx.ScreenDC()
-            size = screen.GetSize()
+            #size = screen.GetSize()
             bmp = wx.EmptyBitmap(w, h)
             wx.MemoryDC(bmp).Blit(
                 0, 0,   # dest x, y
