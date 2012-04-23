@@ -32,54 +32,39 @@ def get_images(am):
     return i1tl, i1o, i2o
 
 
-def get_images_hard(am):
-    print "focus diff"
-    time.sleep(1)
-    print "fetching"
-    i1tl = (497, 237)
-    i1br = (719, 458)
-
-    i1 = i1tl[0], i1tl[1], i1br[0] - i1tl[0], i1br[1] - i1tl[1]
-
-    i2tl = (804, 239)
-    i2 = i2tl[0], i2tl[1], i1[2], i1[3]
-
-    i1o = am.grab_screen(*i1)
-    i2o = am.grab_screen(*i2)
-
-    return i1tl, i1o, i2o
-
-
 def get_difference_image(im1, im2):
-    # pick a sample
-    pix1 = numpy.array(ImageOps.grayscale(im1))[32:64, 32:64]
-    pix2 = numpy.array(ImageOps.grayscale(im2))[32:64, 32:64]
+    try:
+        import cv2
+        result = cv2.matchTemplate(numpy.array(im1), numpy.array(im2)[32:-32, 32:-32], cv2.TM_CCOEFF_NORMED)
+        #Image.fromarray(result * 255).show()
+        off = numpy.unravel_index(result.argmax(), result.shape)
+        minoff = off[0]-32, off[1]-32
+    except ImportError:
+        # pick a sample
+        pix1 = numpy.array(ImageOps.grayscale(im1))[32:64, 32:64]
+        pix2 = numpy.array(ImageOps.grayscale(im2))[32:64, 32:64]
 
-    mindiff = sys.maxint
-    minoff = (0, 0)
+        mindiff = sys.maxint
+        minoff = (0, 0)
 
-    # find best alignment for the sample
-    for xoff in range(-20, 20):
-        for yoff in range(-20, 20):
-            #print xoff, yoff
-            pix2off = pix2
-            pix2off = numpy.roll(pix2off, xoff, 0)
-            pix2off = numpy.roll(pix2off, yoff, 1)
-            diff = sum((numpy.maximum(pix1, pix2off) - numpy.minimum(pix1, pix2off)).flatten())
-            if diff < mindiff:
-                mindiff = diff
-                minoff = xoff, yoff
-                print mindiff, minoff
+        # find best alignment for the sample
+        for xoff in range(-20, 20):
+            for yoff in range(-20, 20):
+                #print xoff, yoff
+                pix2off = pix2
+                pix2off = numpy.roll(pix2off, xoff, 0)
+                pix2off = numpy.roll(pix2off, yoff, 1)
+                diff = sum((numpy.maximum(pix1, pix2off) - numpy.minimum(pix1, pix2off)).flatten())
+                if diff < mindiff:
+                    mindiff = diff
+                    minoff = xoff, yoff
+                    print mindiff, minoff
 
     # align the full images
     xoff, yoff = minoff
 
-    if True:
-        pix1 = numpy.array(im1)
-        pix2 = numpy.array(im2)
-    else:
-        pix1 = numpy.array(ImageOps.grayscale(im1))
-        pix2 = numpy.array(ImageOps.grayscale(im2))
+    pix1 = numpy.array(im1)
+    pix2 = numpy.array(im2)
 
     pix2off = pix2
     pix2off = numpy.roll(pix2off, minoff[0], 0)
